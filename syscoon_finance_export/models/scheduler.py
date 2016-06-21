@@ -15,6 +15,7 @@ class ExportMoveScheduler(models.TransientModel):
     def export_move_scheduler(self):
         export_config = self.env['export.configuration'].search([])
         move_to_datev = self.env['account.move']
+        _logger.info('Export Move Scheduler started')
         for config in export_config:
             if not config.scheduler_journals:
                 _logger.warning('No Journals defined for the Scheduler in company!')

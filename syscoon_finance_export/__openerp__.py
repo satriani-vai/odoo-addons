@@ -2,12 +2,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'syscoon Datev-Export',
+    'name': 'syscoon Finance-Export',
     'version': '9.0.0.1',
     'category': 'Accounting',
     'author': 'Mathias Neef',
     'description': """
-Generates a CSV-Export for Datev.
+Generates a CSV-Export for Datev and other German Accounting Programms.
     """,
     'sequence': 190,
     'website': 'http://syscoon.com',
