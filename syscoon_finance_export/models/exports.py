@@ -28,8 +28,7 @@ class ExportExports(models.Model):
 
     @api.multi
     def _reset_datev_move(self, move):
-        export_moves = self.env['export.move']
-        export_moves = export_moves.search([('export_export', '=', move)])
+        export_moves = self.env['export.move'].search([('export_export', '=', move)])
         export_moves.write({'state': 'created'})
 
     @api.multi

@@ -15,6 +15,7 @@ class ExportConfiguration(models.Model):
     auto_export_header = fields.Boolean('Automated Export Header')
     client_number = fields.Char('Client Number', size=20)
     export_method = fields.Selection([('gross', 'gross'), ('net', 'net')], required=True)
+    scheduler_journals = fields.Many2many('account.journal')
 
     _sql_constraints = [
         ('company_unique', 'unique (company_id)',
