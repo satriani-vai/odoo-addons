@@ -8,10 +8,9 @@ class ExportKey(models.Model):
     _name = 'export.key'
     _order = 'name'
 
-    name = fields.Char('Name')
+    name = fields.Char('Name', default='')
     active = fields.Boolean('Active', default=True)
-    vat_code = fields.Many2one(comodel_name='account.tax',
-        string='VAT Code')
+    vat_code = fields.Many2one('account.tax', string='VAT Code')
     export_key = fields.Char('Export Key')
     company_id = fields.Many2one('res.company', string='Company', required=True,
         default=lambda self: self.env['res.company']._company_default_get('export.key'))

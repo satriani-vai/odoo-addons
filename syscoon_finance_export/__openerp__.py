@@ -2,17 +2,20 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'copadoMEDIA Datev-Export',
+    'name': 'syscoon Finance-Export',
     'version': '9.0.0.1',
-    'category': 'Sales',
+    'category': 'Accounting',
     'author': 'Mathias Neef',
     'description': """
-Generates a CSV-Export for Datev.
+Generates a CSV-Export for Datev and other German Accounting Programms.
     """,
-    'website': 'http://copado.de',
+    'sequence': 190,
+    'website': 'http://syscoon.com',
     'depends' : ['account'],
     'data': [
+        'security/ir.model.access.csv',
         'data/sequences.xml',
+        'data/scheduler.xml',
         'views/menu.xml',
         'views/key.xml',
         'views/auto_account.xml',

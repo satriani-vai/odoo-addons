@@ -14,6 +14,6 @@ class ExportMoveUnlink(models.TransientModel):
             if not move.export_export:
                 moves_2_delete += move
         if not moves_2_delete:
-            raise UserError(_('There is no posted move item to create a Datev-Move.'))
+            raise UserError(_('Pleas delet the Export first, before you can delete a move.'))
         moves_2_delete.action_datev_move_unlink()
         return {'type': 'ir.actions.act_window_close'}

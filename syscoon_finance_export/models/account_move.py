@@ -3,15 +3,15 @@
 
 from openerp import models, fields, api, _
 from openerp.exceptions import UserError
+from openerp.tools.float_utils import float_is_zero
 
 
 class AccountMove2ExportMove(models.Model):
     _inherit = 'account.move'
 
-    state = fields.Selection(selection_add=[('export_move',\
-        'Datev Move Created')])
+    state = fields.Selection(
+        selection_add=[('export_move', 'Datev Move Created')])
 
-    @api.model
     def st_compute_debit_credit(self, lines):
         debit = 0.0
         debit_accounts = []
@@ -32,31 +32,28 @@ class AccountMove2ExportMove(models.Model):
         }
         return totals
 
-    def st_check_tax_id(self, line):
+    def st_create_tax_additions(self, line):
         tax_bkey, tax_pc, tax_account, tax_account_refund = '', 0.0, '', ''
         if line.tax_ids and len(line.tax_ids) == 1:
-            tax = self.env['export.key']\
-                .search([('vat_code', '=', line.tax_ids.id)])
-            for t in tax:
-                tax_bkey = t.export_key
-                tax_pc = t.vat_code.amount
-                tax_account = t.vat_code.account_id.code
-                tax_account_refund = t.vat_code.refund_account_id.code
+            tax = self.env['export.key'].search(
+                [('vat_code', '=', line.tax_ids.id)], limit=1)
+            tax_bkey = tax.export_key
+            tax_pc = tax.vat_code.amount
+            tax_account = tax.vat_code.account_id.code
+            tax_account_refund = tax.vat_code.refund_account_id.code
         return tax_bkey, tax_pc, tax_account, tax_account_refund
 
     def st_check_account(self, line):
-        auto_account = False
-        auto_account_id = self.env['export.auto.account']\
-            .search([('account_id', '=', line.account_id.id)])
+        auto_account_id = self.env['export.auto.account'].search(
+            [('account_id', '=', line.account_id.id)])
         tax_bkey, tax_pc, tax_account, tax_account_refund =\
-            self.st_check_tax_id(line)
+            self.st_create_tax_additions(line)
         if auto_account_id:
-            auto_account = True
-            if tax_pc == 0.0:
+            if float_is_zero(tax_pc, precision_rounding=2):
                 tax_pc = auto_account_id.vat_code.amount
-        return auto_account, tax_bkey, tax_pc, tax_account, tax_account_refund
+        return bool(auto_account_id), tax_bkey, tax_pc, tax_account, tax_account_refund
 
-    def st_calculate_amount(self, line, tax_pc):
+    def st_calculate_amount(self, move, line, tax_pc):
         #todo: gross if company-settings are gross
         amount = 0.0
         if line.debit:
@@ -67,8 +64,7 @@ class AccountMove2ExportMove(models.Model):
             gross_amount = amount * (1 + (tax_pc / 100))
             tax = gross_amount - amount
             amount += tax
-        dp = line.company_id.currency_id.decimal_places
-        amount = round(amount, dp)
+        amount = move.currency_id.round(amount)
         amount = str(amount).replace('.', ',')
         return amount
 
@@ -79,7 +75,7 @@ class AccountMove2ExportMove(models.Model):
         res['date'] = move.date
         res['currency'] = move.currency_id.name
         res['dc_sign'] = account['sign']
-        res['amount'] = self.st_calculate_amount(line, tax_pc)
+        res['amount'] = self.st_calculate_amount(move, line, tax_pc)
         if auto_account:
             res['bkey'] = ''
         else:
@@ -87,10 +83,10 @@ class AccountMove2ExportMove(models.Model):
         res['account_offset'] = line.account_id.code
         res['slip1'] = move.name.replace('/', '')
         if line.date_maturity:
-            res['slip2'] = '%s%s%s' % (line.date_maturity[8:10], line.date_maturity[5:7], line.date_maturity[2:4])
+            res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%d%m%y')
         else:
             res['slip2'] = ''
-        res['booking_date'] = '%s%s' % (move.date[8:10], move.date[5:7])
+        res['booking_date'] = fields.Date.from_string(move.date).strftime('%d%m')
         res['account'] = account['account']
         res['cost1'] = ''
         res['cost2'] = ''
@@ -116,11 +112,10 @@ class AccountMove2ExportMove(models.Model):
             if len(totals['credit_accounts']) == 1 and not line.tax_ids:
                 account = totals['credit_accounts'][0]
                 sign = 'h'
-        res = {
+        return {
             'account': account,
             'sign': sign
         }
-        return res
 
     def st_generate_hash(self, res):
         return "%s-%s-%s-%s-%s" % (
@@ -150,7 +145,8 @@ class AccountMove2ExportMove(models.Model):
     def st_generate_line(self, move, tax_accounts):
         booking = []
         res = {}
-        move_lines = self.env['account.move.line'].search([('move_id', '=', move.id)])
+        move_lines = move.line_ids
+        #move_lines = self.env['account.move.line'].search([('move_id', '=', move.id)])
         account = self.st_generate_account(move_lines)
         for line in move_lines:
             res = self.st_build_line(account, move, res, line)
@@ -179,6 +175,7 @@ class AccountMove2ExportMove(models.Model):
     def action_export_move_create(self):
         tax_accounts = self.st_check_tax_lines()
         company = self.env['res.company']._company_default_get('account.move')
+        # export_config will be used in a later version
         export_config = self.env['export.configuration'].search([('company_id', '=', company.id)])
         for move in self:
             self.st_generate_line(move, tax_accounts)

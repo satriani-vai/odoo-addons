@@ -25,7 +25,7 @@ class ExportMove(models.Model):
     bkey = fields.Char('Booking Key', size=2)
     account_offset = fields.Char('Offset Account', size=8)
     slip1 = fields.Char('Slip Field 1', size=12)
-    slip2 = fields.Char('slip Field 2', size=6)
+    slip2 = fields.Char('Slip Field 2', size=6)
     booking_date = fields.Char('Date', size=4)
     account = fields.Char('Account', size=8)
     cost1 = fields.Char('Cost 1', size=30)
@@ -43,10 +43,8 @@ class ExportMove(models.Model):
         string='Company', required=True, 
         default=lambda self: self.env['res.company'].\
         _company_default_get('datev.auto.account'))
-    export_export = fields.Many2one(comodel_name='export.exports',
-        string='Export')
-    account_move = fields.Many2one(comodel_name='account.move',
-        string="Account Move")
+    export_export = fields.Many2one('export.exports', string='Export')
+    account_move = fields.Many2one('account.move', string="Account Move")
     move_date = fields.Date('Move Date')
 
     def _create_date_range(self, dates):
@@ -54,9 +52,9 @@ class ExportMove(models.Model):
         max_date = max(dates)
         return '%s - %s' % (min_date, max_date)
 
-    def _check_moves_2_export(self, moves_2_export, export_moves):
+    def _check_moves(self, moves_2_check, export_moves):
         export_moves_check = export_moves
-        for m2d in moves_2_export:
+        for m2d in moves_2_check:
             if m2d not in export_moves:
                 export_moves_check += m2d
         if export_moves_check == export_moves:
@@ -71,15 +69,15 @@ class ExportMove(models.Model):
         export_moves = self.env['export.move']
         for m in self:
             if m.state == 'created':
-                moves_2_export = self.env['export.move'].search([('account_move', '=', m.account_move.id)])
-                export_moves = self._check_moves_2_export(moves_2_export, export_moves)
-        buffer = cStringIO.StringIO()
-        writer = csv.writer(buffer, delimiter=';', quotechar='"')
+                moves_2_check = self.env['export.move'].search([('account_move', '=', m.account_move.id)])
+                export_moves = self._check_moves(moves_2_check, export_moves)
+        csv_buffer = cStringIO.StringIO()
+        writer = csv.writer(csv_buffer, delimiter=';', quotechar='"')
         company = self.env['res.company'].\
             _company_default_get('export.exports')
         export_config = self.env['export.configuration'].\
             search([('company_id', '=', company.id)])
-        export_heder = [
+        export_header = [
             'Währungskennung', 'Soll-/Haben-Kennzeichen',
             'Umsatz (ohne Soll-/Haben-Kennzeichen)', 'BU-Schlüssel',
             'Gegenkonto (ohne BU-Schlüssel)', 'Belegfeld 1', 'Belegfeld 2',
@@ -87,25 +85,23 @@ class ExportMove(models.Model):
             'Skonto', 'Buchungstext', 'EU-Land und UStID', 'EU-Steuersatz',
             'Basiswährungsbetrag', 'Basiswährungskennung', 'Kurs'
         ]
-        writer.writerow(export_heder)
+        writer.writerow(export_header)
         dates = []
-        counter = 0
         for e in export_moves:
             dates.append(e.move_date)
             export_row = [e.currency, e.dc_sign, e.amount, e.bkey, e.account_offset,
-                e.slip1, e.slip2, e.booking_date, e.cost1, e.cost2, e.cost_quant,
+                e.slip1, e.slip2, e.booking_date, e.account, e.cost1, e.cost2, e.cost_quant,
                 e.discount, e.bookingtext, e.vat_id, e.eu_tax, e.base_cur_amount,
                 e.base_cur_code, e.exchange_rate
             ]
             writer.writerow(export_row)
             e.write({'state': 'exported', 'export_export': export_id.id})
-            counter += 1
         export_val = {
             'state': 'created',
             'date_range': self._create_date_range(dates),
-            'file': base64.encodestring(buffer.getvalue()),
+            'file': base64.encodestring(csv_buffer.getvalue()),
             'company_id': company.id,
-            'note': '%s Moves exported' % counter
+            'note': '%s Moves exported' % len(export_moves)
         }
         export_id.write(export_val)
 
@@ -122,23 +118,13 @@ class ExportMove(models.Model):
         raise UserError(_('Forbbiden to duplicate!'),\
             _('Is not possible to duplicate a Datev Move!'))
 
-    def check_move_2_delet(self, moves_2_delete, export_moves):
-        export_moves_check = export_moves
-        for m2d in moves_2_delete:
-            if m2d not in export_moves:
-                export_moves_check += m2d
-        if export_moves_check == export_moves:
-            return export_moves
-        else:
-            return export_moves_check
-
     @api.multi
     def action_datev_move_unlink(self):
         account_moves = self.env['account.move']
         export_moves = self.env['export.move']
         for dm in self:
-            moves_2_delete = self.env['export.move'].search([('account_move', '=', dm.account_move.id)])
-            export_moves = self.check_move_2_delet(moves_2_delete, export_moves)
+            moves_2_check = self.env['export.move'].search([('account_move', '=', dm.account_move.id)])
+            export_moves = self._check_moves(moves_2_check, export_moves)
             if dm.account_move not in account_moves:
                 account_moves += dm.account_move
         for move in export_moves:

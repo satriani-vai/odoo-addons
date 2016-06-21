@@ -3,11 +3,12 @@
 
 from openerp import models, fields, api
 
+
 class ExportAutoAccount(models.Model):
     _name = 'export.auto.account'
     _order = 'name'
 
-    name = fields.Char('Name')
+    name = fields.Char('Name', default='')
     account_id = fields.Many2one(comodel_name='account.account',
         string='Account')
     vat_code = fields.Many2one(comodel_name='account.tax',
