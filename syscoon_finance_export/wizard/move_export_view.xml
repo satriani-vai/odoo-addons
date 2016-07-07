@@ -29,7 +29,7 @@
         </record>
 
         <record model="ir.values" id="create_export_file">
-            <field name="model_id" ref="syscoon_datev_export.model_export_move" />
+            <field name="model_id" ref="syscoon_finance_export.model_export_move" />
             <field name="name">Create Export File</field>
             <field name="key2">client_action_multi</field>
             <field name="value" eval="'ir.actions.act_window,' + str(ref('action_export_file_create'))" />
