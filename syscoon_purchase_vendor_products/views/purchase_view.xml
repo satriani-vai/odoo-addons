@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="metro_purchase_vendor_product_filter" model="ir.ui.view">
+            <field name="name">metro.purchase.vendor.product.filter</field>
+            <field name="model">purchase.order</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook" position="before">
+                    <field name="product_filter" invisible="1"/>
+                    <button name="action_set_product_filter" type="object" string="Set Product Filter" class="oe_highlight" attrs="{'invisible': [('product_filter', '=', True)]}"/>
+                    <button name="action_set_product_filter" type="object" string="Remove Product Filter" class="oe_highlight" attrs="{'invisible': [('product_filter', '=', False)]}"/>
+                </xpath>
+            </field>
+        </record>
+
+
+
+    </data>
+</odoo>
