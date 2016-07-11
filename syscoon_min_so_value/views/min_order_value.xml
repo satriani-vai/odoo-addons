@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="assets_backend" name="module_name assets" inherit_id="web.assets_backend">
+            <xpath expr="." position="inside">
+                 <link rel="stylesheet" href="/metro_minimum_order_sum/static/src/css/style.css"/>
+            </xpath>
+        </template>
+
+        <record id="metro_min_order_sum_partner" model="ir.ui.view">
+            <field name="name">metro.min.order.sum.partner</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group[@name='sale']" position="inside">
+                    <field name="min_order_sum"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="metro_sale_min_order_sum" model="ir.ui.view">
+            <field name="name">metro.sale.min.order.sum</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//form/sheet/group" postion="after">
+                    <group string="Minimum Order Value">
+                        <field name="min_order_sum_green" invisible="1"/>
+                        <field name="min_order_sum" readonly="1"/>
+                        <field name="min_order_sum_left" class="min_order_green" attrs="{'invisible': [('min_order_sum_green', '==', False)]}"/>
+                        <field name="min_order_sum_left" class="min_order_red" attrs="{'invisible': [('min_order_sum_green', '==', True)]}"/>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
