@@ -2359,7 +2359,7 @@
         <record id="l10n_chart_de_ikr" model="account.chart.template">
             <field name="cash_account_code_prefix">288</field>
             <field name="bank_account_code_prefix">280</field>
-            <field name="account_code_digits">4</field>
+            <field name="code_digits">4</field>
             <field name="property_account_receivable_id" ref="chart_ikr_02400"/>
             <field name="property_account_payable_id" ref="chart_ikr_04400"/>
             <field name="property_account_expense_categ_id" ref="chart_ikr_06080"/>
