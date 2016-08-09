@@ -1,0 +1,64 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* syscoon_salutation
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 9.0e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-08-09 18:46+0000\n"
+"PO-Revision-Date: 2016-08-09 18:46+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: syscoon_salutation
+#: selection:res.partner.title,name_selection:0
+msgid "Complete Name"
+msgstr "Gesamter Name"
+
+#. module: syscoon_salutation
+#: code:addons/syscoon_salutation/models/res_partner_salutation.py:26
+#, python-format
+msgid "Dear Sir or Madam"
+msgstr "Sehr geehrte Damen und Herren"
+
+#. module: syscoon_salutation
+#: selection:res.partner.title,name_selection:0
+msgid "Firstname"
+msgstr "Vorname"
+
+#. module: syscoon_salutation
+#: selection:res.partner.title,name_selection:0
+msgid "Lastname"
+msgstr "Nachname"
+
+#. module: syscoon_salutation
+#: model:ir.model.fields,field_description:syscoon_salutation.field_res_partner_title_name_selection
+msgid "Name Selection"
+msgstr "Namensauswahl"
+
+#. module: syscoon_salutation
+#: selection:res.partner.title,name_selection:0
+msgid "None"
+msgstr "Keinen"
+
+#. module: syscoon_salutation
+#: model:ir.model,name:syscoon_salutation.model_res_partner
+msgid "Partner"
+msgstr "Partner"
+
+#. module: syscoon_salutation
+#: model:ir.model.fields,field_description:syscoon_salutation.field_res_partner_partner_salutation
+#: model:ir.model.fields,field_description:syscoon_salutation.field_res_partner_title_salutation
+msgid "Salutation"
+msgstr "Briefanrede"
+
+#. module: syscoon_salutation
+#: model:ir.model,name:syscoon_salutation.model_res_partner_title
+msgid "res.partner.title"
+msgstr "res.partner.title"
+

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="syscoon_partner_salutation_view" model="ir.ui.view">
+            <field name="name">syscoon.partner.salutation.view</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='title']" position="after">
+                    <field name="partner_salutation" attrs="{'invisible': [('is_company', '=', True)]}"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="syscoon_title_salutation_view" model="ir.ui.view">
+            <field name="name">syscoon.title.salutation.view</field>
+            <field name="model">res.partner.title</field>
+            <field name="inherit_id" ref="base.view_partner_title_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='shortcut']" position="after">
+                    <field name="name_selection"/>
+                    <field name="salutation"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
