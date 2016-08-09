@@ -18,7 +18,7 @@ msgstr ""
 #. module: syscoon_salutation
 #: selection:res.partner.title,name_selection:0
 msgid "Complete Name"
-msgstr "Gesamter Nama"
+msgstr "Gesamter Name"
 
 #. module: syscoon_salutation
 #: code:addons/syscoon_salutation/models/res_partner_salutation.py:26

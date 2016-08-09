@@ -16,7 +16,7 @@ class res_partner(models.Model):
         for ps in self:
             if ps.title:
                 if ps.title.name_selection == 'complete':
-                    salname = ps.firstname & ' ' & ps.lastname
+                    salname = '%s %s' % (ps.firstname, ps.lastname)
                 elif ps.title.name_selection == 'lastname':
                     salname = ps.lastname
                 elif ps.title.name_selection == 'firstname':
