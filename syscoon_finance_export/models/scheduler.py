@@ -22,7 +22,7 @@ class ExportMoveScheduler(models.TransientModel):
             else:
                 moves = self.env['account.move'].search([
                     ('company_id', '=', config.company_id.id),
-                    ('journal_id', '=', config.scheduler_journals.ids),
+                    ('journal_id', 'in', config.scheduler_journals.ids),
                     ('state', '=', 'posted')
                 ])
             move_to_datev += moves

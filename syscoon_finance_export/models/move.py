@@ -38,7 +38,6 @@ class ExportMove(models.Model):
     base_cur_amount = fields.Char('Base Currency Amount', size=30)
     base_cur_code = fields.Char('Base Currency Code', size=3)
     exchange_rate = fields.Char('Currency Exchange Rate', size=30)
-    exported = fields.Char('Export File', size=20)
     company_id = fields.Many2one('res.company',
         string='Company', required=True, 
         default=lambda self: self.env['res.company'].\
