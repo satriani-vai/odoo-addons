@@ -40,7 +40,6 @@
                                 <field name="exchange_rate"/>
                             </group>
                             <group string="Info Data">
-                                <field name="exported"/>
                                 <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
                                 <field name="export_export"/>
                                 <field name="account_move"/>
@@ -66,7 +65,7 @@
                     <field name="account"/>
                     <field name="bookingtext"/>
                     <field name="account_move"/>
-                    <field name="exported"/>
+                    <field name="export_export"/>
                     <field name="state"/>
                 </tree>
             </field>
