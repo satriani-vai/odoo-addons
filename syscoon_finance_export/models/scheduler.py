@@ -19,6 +19,7 @@ class ExportMoveScheduler(models.TransientModel):
         for config in export_config:
             if not config.scheduler_journals:
                 _logger.warning('No Journals defined for the Scheduler in company!')
+                return
             else:
                 moves = self.env['account.move'].search([
                     ('company_id', '=', config.company_id.id),
