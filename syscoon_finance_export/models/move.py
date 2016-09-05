@@ -88,10 +88,31 @@ class ExportMove(models.Model):
         dates = []
         for e in export_moves:
             dates.append(e.move_date)
-            export_row = [e.currency, e.dc_sign, e.amount, e.bkey, e.account_offset,
-                e.slip1, e.slip2, e.booking_date, e.account, e.cost1, e.cost2, e.cost_quant,
-                e.discount, e.bookingtext, e.vat_id, e.eu_tax, e.base_cur_amount,
-                e.base_cur_code, e.exchange_rate
+            amount = e.amount.replace('.', ',')
+            if not e.bkey:
+                bkey = ''
+            else:
+                bkey = e.bkey
+            export_row = [
+                e.currency.encode('iso-8859-1'),
+                e.dc_sign.encode('iso-8859-1'),
+                amount,
+                bkey,
+                e.account.encode('iso-8859-1'),
+                e.slip1.encode('iso-8859-1'),
+                e.slip2.encode('iso-8859-1'),
+                e.booking_date.encode('iso-8859-1'),
+                e.account_offset.encode('iso-8859-1'),
+                e.cost1.encode('iso-8859-1'),
+                e.cost2.encode('iso-8859-1'),
+                e.cost_quant.encode('iso-8859-1'),
+                e.discount.encode('iso-8859-1'),
+                e.bookingtext.encode('iso-8859-1'),
+                e.vat_id.encode('iso-8859-1'),
+                e.eu_tax.encode('iso-8859-1'),
+                e.base_cur_amount.encode('iso-8859-1'),
+                e.base_cur_code.encode('iso-8859-1'),
+                e.exchange_rate.encode('iso-8859-1')
             ]
             writer.writerow(export_row)
             e.write({'state': 'exported', 'export_export': export_id.id})
