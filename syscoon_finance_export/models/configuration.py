@@ -16,6 +16,7 @@ class ExportConfiguration(models.Model):
     client_number = fields.Char('Client Number', size=20)
     export_method = fields.Selection([('gross', 'gross'), ('net', 'net')], required=True)
     scheduler_journals = fields.Many2many('account.journal')
+    scheduler_limit = fields.Integer('Limit Moves', default=0)
 
     _sql_constraints = [
         ('company_unique', 'unique (company_id)',

@@ -27,6 +27,7 @@
                         </group>
                         <group string="Journals for Scheduler">
                             <field name="scheduler_journals" widget="many2many_tags"/>
+                            <field name="scheduler_limit"/>
                         </group>
                     </sheet>
                 </form>

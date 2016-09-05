@@ -3,7 +3,7 @@
 
 {
     'name': 'syscoon Finance-Export',
-    'version': '9.0.0.1',
+    'version': '9.0.0.2',
     'category': 'Accounting',
     'author': 'Mathias Neef',
     'description': """
@@ -21,6 +21,7 @@ Generates a CSV-Export for Datev and other German Accounting Programms.
         'views/auto_account.xml',
         'views/move.xml',
         'views/configuration.xml',
+        'views/logger.xml',
         'views/exports.xml',
         'wizard/move_create_view.xml',
         'wizard/move_unlink_view.xml',

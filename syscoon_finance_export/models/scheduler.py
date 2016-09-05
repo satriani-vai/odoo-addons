@@ -21,11 +21,18 @@ class ExportMoveScheduler(models.TransientModel):
                 _logger.warning('No Journals defined for the Scheduler in company!')
                 return
             else:
-                moves = self.env['account.move'].search([
-                    ('company_id', '=', config.company_id.id),
-                    ('journal_id', 'in', config.scheduler_journals.ids),
-                    ('state', '=', 'posted')
-                ])
+                if config.scheduler_limit:
+                    moves = self.env['account.move'].search([
+                        ('company_id', '=', config.company_id.id),
+                        ('journal_id', 'in', config.scheduler_journals.ids),
+                        ('state', '=', 'posted')
+                    ], order='id asc', limit=config.scheduler_limit)
+                else:
+                    moves = self.env['account.move'].search([
+                        ('company_id', '=', config.company_id.id),
+                        ('journal_id', 'in', config.scheduler_journals.ids),
+                        ('state', '=', 'posted')
+                    ], order='id asc')
             move_to_datev += moves
             if not move_to_datev:
                 _logger.warning('There is no posted move item to create a Datev-Move.')

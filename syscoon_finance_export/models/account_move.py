@@ -5,6 +5,11 @@ from openerp import models, fields, api, _
 from openerp.exceptions import UserError
 from openerp.tools.float_utils import float_is_zero
 
+from datetime import datetime
+
+import logging
+_logger = logging.getLogger(__name__)
+
 
 class AccountMove2ExportMove(models.Model):
     _inherit = 'account.move'
@@ -12,11 +17,12 @@ class AccountMove2ExportMove(models.Model):
     state = fields.Selection(
         selection_add=[('export_move', 'Datev Move Created')])
 
-    def st_compute_debit_credit(self, lines):
+    def st_compute_debit_credit(self, move, lines):
         debit = 0.0
         debit_accounts = []
         credit = 0.0
         credit_accounts = []
+        invoice = self.env['account.invoice'].search([('move_id', '=', move.id)])
         for line in lines:
             if line.debit:
                 debit += line.debit
@@ -24,11 +30,29 @@ class AccountMove2ExportMove(models.Model):
             if line.credit:
                 credit += line.credit
                 credit_accounts.append(line.account_id.code)
+        if invoice and invoice.type in ['out_invoice', 'in_refund']:
+            debit_accounts = []
+            if not invoice.account_id.code in debit_accounts:
+                debit_accounts.append(invoice.account_id.code)
+        if invoice and invoice.type in ['out_refund', 'in_invoice']:
+            credit_accounts = []
+            if not invoice.account_id.code in debit_accounts:
+                credit_accounts.append(invoice.account_id.code)
+        for da in debit_accounts:
+            account = self.env['account.account'].search([('code', '=', da)])
+            if account.user_type_id.type in ('receivable', 'payable'):
+                debit_accounts =[]
+                debit_accounts.append(account.code)
+        for ca in credit_accounts:
+            account = self.env['account.account'].search([('code', '=', ca)])
+            if account.user_type_id.type in ('receivable', 'payable'):
+                credit_accounts = []
+                credit_accounts.append(account.code)
         totals = {
             'debit': debit,
-            'debit_accounts': debit_accounts,
+            'debit_accounts': sorted(set(debit_accounts)),
             'credit': credit,
-            'credit_accounts': credit_accounts
+            'credit_accounts': sorted(set(credit_accounts))
         }
         return totals
 
@@ -65,7 +89,6 @@ class AccountMove2ExportMove(models.Model):
             tax = gross_amount - amount
             amount += tax
         amount = move.currency_id.round(amount)
-        amount = str(amount).replace('.', ',')
         return amount
 
     def st_build_line(self, account, move, res, line):
@@ -75,6 +98,7 @@ class AccountMove2ExportMove(models.Model):
         res['date'] = move.date
         res['currency'] = move.currency_id.name
         res['dc_sign'] = account['sign']
+#        res['amount'] = str(self.st_calculate_amount(move, line, tax_pc)).replace('.', ',')
         res['amount'] = self.st_calculate_amount(move, line, tax_pc)
         if auto_account:
             res['bkey'] = ''
@@ -103,8 +127,10 @@ class AccountMove2ExportMove(models.Model):
         res['move_date'] = move.date
         return res
 
-    def st_generate_account(self, lines):
-        totals = self.st_compute_debit_credit(lines)
+    def st_generate_account(self, move, lines):
+        totals = self.st_compute_debit_credit(move, lines)
+        account = False
+        sign = False
         for line in lines:
             if len(totals['debit_accounts']) == 1 and not line.tax_ids:
                 account = totals['debit_accounts'][0]
@@ -118,7 +144,8 @@ class AccountMove2ExportMove(models.Model):
         }
 
     def st_generate_hash(self, res):
-        return "%s-%s-%s-%s-%s" % (
+        return "%s-%s-%s-%s-%s-%s" % (
+            res['dc_sign'],
             res.get('bkey', 'False'),
             res['account'], 
             res['account_offset'],
@@ -142,25 +169,36 @@ class AccountMove2ExportMove(models.Model):
             booking.append(val.copy())
         return booking
 
-    def st_generate_line(self, move, tax_accounts):
+    def st_generate_line(self, move, tax_accounts, export_logger, export_errors, export_moves):
         booking = []
         res = {}
-        move_lines = move.line_ids
-        #move_lines = self.env['account.move.line'].search([('move_id', '=', move.id)])
-        account = self.st_generate_account(move_lines)
-        for line in move_lines:
-            res = self.st_build_line(account, move, res, line)
-            if res['account_offset'] != res['account']:
-                if res['account_offset'] in tax_accounts:
-                    continue
-                elif res['account'] in tax_accounts:
-                    continue
-                else:
-                    booking.append(res.copy())
-        grouped_lines = self.st_create_group(booking)
-        for gl in grouped_lines:
-            self.env['export.move'].create(gl)
-            self.write({'state': 'export_move'})
+        if move.amount:
+            move_lines = move.line_ids
+            account = self.st_generate_account(move, move_lines)
+            if account['account'] == False:
+                export_logger.append(_('%s has no / to many different accounts in debit / credit and can not exported') % move.name)
+                export_errors += 1
+                return export_errors, export_moves, export_logger
+            export_moves += 1
+            for line in move_lines:
+                if account['sign'] == 's' and line.debit:
+                    account['sign'] = 'h'
+                if account['sign'] == 'h' and line.credit:
+                    account['sign'] = 's'
+                res = self.st_build_line(account, move, res, line)
+                if res['account_offset'] != res['account']:
+                    if res['account_offset'] in tax_accounts:
+                        continue
+                    elif res['account'] in tax_accounts:
+                        continue
+                    else:
+                        booking.append(res.copy())
+            grouped_lines = self.st_create_group(booking)
+            for gl in grouped_lines:
+                self.env['export.move'].create(gl)
+                self.write({'state': 'export_move'})
+            return export_errors, export_moves, export_logger
+
 
     def st_check_tax_lines(self):
         tax_accounts = []
@@ -173,12 +211,31 @@ class AccountMove2ExportMove(models.Model):
 
     @api.multi
     def action_export_move_create(self):
+        export_logger = []
+        export_errors = 0
+        export_moves = 0
         tax_accounts = self.st_check_tax_lines()
         company = self.env['res.company']._company_default_get('account.move')
         # export_config will be used in a later version
         export_config = self.env['export.configuration'].search([('company_id', '=', company.id)])
         for move in self:
-            self.st_generate_line(move, tax_accounts)
+            if not move.amount:
+                export_logger.append(_('%s has amount 0,00 and can not exported') % move.name)
+                export_errors += 1
+            else:
+                em = self.st_generate_line(move, tax_accounts, export_logger, export_errors, export_moves)
+                export_moves = em[1]
+                export_errors = em[0]
+                export_logger = em[2]
+                _logger.info('Move %s created.', move.name)
+        if not export_errors:
+            export_logger.append(_('No Errors, %d moves correctly created') % export_moves)
+        self.env['export.logger'].create({
+            'name': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'errors': export_errors,
+            'moves': export_moves,
+            'logging': '\n'.join(export_logger)
+        })
 
     @api.multi
     def button_cancel(self):

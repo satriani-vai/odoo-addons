@@ -23,7 +23,7 @@ class ExportExports(models.Model):
         if vals.get('name', 'New') == 'New':
             vals['name'] = self.env['ir.sequence'].\
                 next_by_code('st.export.sequence')
-            vals['file_name'] = vals.get('name') + '.csv'
+            vals['file_name'] = vals['name'] + '.csv'
         return super(ExportExports, self).create(vals)
 
     @api.multi

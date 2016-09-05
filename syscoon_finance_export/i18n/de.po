@@ -6,14 +6,26 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 9.0e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-21 09:34+0000\n"
-"PO-Revision-Date: 2016-06-21 09:34+0000\n"
+"POT-Creation-Date: 2016-09-05 21:53+0000\n"
+"PO-Revision-Date: 2016-09-05 21:53+0000\n"
 "Last-Translator: <>\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: \n"
+
+#. module: syscoon_finance_export
+#: code:addons/syscoon_finance_export/models/account_move.py:223
+#, python-format
+msgid "%s has amount 0,00 and can not exported"
+msgstr "%s hat den Betrag 0,00 und kann nicht exportiert werden"
+
+#. module: syscoon_finance_export
+#: code:addons/syscoon_finance_export/models/account_move.py:179
+#, python-format
+msgid "%s has no / to many different accounts in debit / credit and can not exported"
+msgstr "%s hat keine / zu viele Soll- / Haben-Konten und kann icht exportiert werden"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_auto_account_account_id
@@ -24,7 +36,7 @@ msgstr "Konto"
 #. module: syscoon_finance_export
 #: model:ir.model,name:syscoon_finance_export.model_account_move
 msgid "Account Entry"
-msgstr "Buchungseintrag"
+msgstr "Buchungssatz"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_account_move
@@ -124,7 +136,7 @@ msgstr "Buchungstext"
 #: model:ir.ui.view,arch_db:syscoon_finance_export.create_export_move_view
 #: model:ir.ui.view,arch_db:syscoon_finance_export.unlink_export_move_view
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr "Verwerfen"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_client_number
@@ -143,7 +155,7 @@ msgstr "Unternehmen"
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_name
 msgid "Company Name"
-msgstr "Firmenname"
+msgstr "Unternehmensname"
 
 #. module: syscoon_finance_export
 #: model:ir.ui.menu,name:syscoon_finance_export.menu_finance_export_export_configuration
@@ -204,23 +216,30 @@ msgid "Created"
 msgstr "Erstellt"
 
 #. module: syscoon_finance_export
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_moves
+msgid "Created Moves"
+msgstr "Erzeugte Buchungen"
+
+#. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_auto_account_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_create_uid
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_unlink_create_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_syscoon_export_move_scheduler_create_uid
 msgid "Created by"
-msgstr "Angelegt von"
+msgstr "Erstellt von"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_auto_account_create_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_create_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_create_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_create_date
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_create_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_create_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_create_date
@@ -283,20 +302,21 @@ msgstr "Löscht Export-Buchungen"
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_discount
 msgid "Discount"
-msgstr "Skonto"
+msgstr "Rabatt"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_auto_account_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_display_name
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_unlink_display_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_syscoon_export_move_scheduler_display_name
 msgid "Display Name"
-msgstr "Angezeigter Name"
+msgstr "Anzeigename"
 
 #. module: syscoon_finance_export
 #: selection:export.exports,state:0
@@ -307,6 +327,16 @@ msgstr "Entwurf"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_eu_tax
 msgid "EU Tax Rate"
 msgstr "EU Steuersatz"
+
+#. module: syscoon_finance_export
+#: model:ir.model,name:syscoon_finance_export.model_export_logger
+msgid "Error Logging for Move Creation"
+msgstr "Fehlermeldungen für Buchungserstellung"
+
+#. module: syscoon_finance_export
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_errors
+msgid "Errors"
+msgstr "Fehler"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_export
@@ -326,7 +356,6 @@ msgstr "Export Datumsbereich"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_file
-#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_exported
 #: model:ir.ui.view,arch_db:syscoon_finance_export.view_export_exports_view
 msgid "Export File"
 msgstr "Export-Datei"
@@ -340,6 +369,7 @@ msgstr "Export Dateiname"
 #: model:ir.actions.act_window,name:syscoon_finance_export.action_open_export_exports_tree
 #: model:ir.ui.menu,name:syscoon_finance_export.menu_export_exports
 #: model:ir.ui.view,arch_db:syscoon_finance_export.view_export_exports_tree
+#: model:ir.ui.view,arch_db:syscoon_finance_export.view_export_logger_tree
 msgid "Export Files"
 msgstr "Export-Dateien"
 
@@ -347,6 +377,12 @@ msgstr "Export-Dateien"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_export_key
 msgid "Export Key"
 msgstr "Export-Schlüssel"
+
+#. module: syscoon_finance_export
+#: model:ir.actions.act_window,name:syscoon_finance_export.action_open_export_logger_tree
+#: model:ir.ui.view,arch_db:syscoon_finance_export.view_export_logger_view
+msgid "Export Logger"
+msgstr "Export Fehlermeldungen"
 
 #. module: syscoon_finance_export
 #: model:ir.ui.view,arch_db:syscoon_finance_export.view_export_move_view
@@ -366,18 +402,23 @@ msgid "Export method"
 msgstr "Export Methode"
 
 #. module: syscoon_finance_export
+#: model:ir.ui.menu,name:syscoon_finance_export.menu_export_logger
+msgid "Export-Logging"
+msgstr "Export-Fehlermeldungen"
+
+#. module: syscoon_finance_export
 #: selection:export.move,state:0
 msgid "Exported"
 msgstr "Exportiert"
 
 #. module: syscoon_finance_export
-#: code:addons/syscoon_finance_export/models/move.py:118
+#: code:addons/syscoon_finance_export/models/move.py:146
 #, python-format
 msgid "Forbbiden to duplicate!"
 msgstr "Duplizieren nicht möglich"
 
 #. module: syscoon_finance_export
-#: code:addons/syscoon_finance_export/models/account_move.py:187
+#: code:addons/syscoon_finance_export/models/account_move.py:244
 #, python-format
 msgid "Forbidden to Cancel!"
 msgstr "Löschen nicht möglich!"
@@ -387,6 +428,7 @@ msgstr "Löschen nicht möglich!"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_id
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_id
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_id
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_id
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_id
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_id
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_id
@@ -401,7 +443,7 @@ msgid "Info Data"
 msgstr "Info-Daten"
 
 #. module: syscoon_finance_export
-#: code:addons/syscoon_finance_export/models/move.py:119
+#: code:addons/syscoon_finance_export/models/move.py:147
 #, python-format
 msgid "Is not possible to duplicate a Datev Move!"
 msgstr "Es ist nicht möglich eine Datev-Buchung zu duplizieren!"
@@ -416,6 +458,7 @@ msgstr "Journale für Automatik"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration___last_update
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports___last_update
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key___last_update
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger___last_update
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move___last_update
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create___last_update
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export___last_update
@@ -429,6 +472,7 @@ msgstr "Zuletzt geändert am"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_write_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_write_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_write_uid
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_write_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_write_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_write_uid
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_unlink_write_uid
@@ -442,6 +486,7 @@ msgstr "Zuletzt aktualisiert durch"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_write_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_write_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_write_date
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_write_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_create_write_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_export_write_date
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_unlink_write_date
@@ -449,6 +494,16 @@ msgstr "Zuletzt aktualisiert durch"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_syscoon_export_move_scheduler_write_date
 msgid "Last Updated on"
 msgstr "Zuletzt aktualisiert am"
+
+#. module: syscoon_finance_export
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_configuration_scheduler_limit
+msgid "Limit Moves"
+msgstr "Limit Moves"
+
+#. module: syscoon_finance_export
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_logging
+msgid "Logging"
+msgstr "Logging"
 
 #. module: syscoon_finance_export
 #: model:ir.ui.menu,name:syscoon_finance_export.menu_export_configuration
@@ -479,14 +534,21 @@ msgstr "Buchungen"
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_auto_account_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_key_name
+#: model:ir.model.fields,field_description:syscoon_finance_export.field_export_logger_name
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_name
 msgid "Name"
 msgstr "Bezeichnung"
 
 #. module: syscoon_finance_export
+#: code:addons/syscoon_finance_export/models/account_move.py:232
+#, python-format
+msgid "No Errors, %d moves correctly created"
+msgstr "No Errors, %d moves correctly created"
+
+#. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_note
 msgid "Note"
-msgstr "Info"
+msgstr "Bemerkung"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_account_offset
@@ -500,7 +562,7 @@ msgid "Pleas delet the Export first, before you can delete a move."
 msgstr "Bitte löschen Sie den Expor befor Sie die Buchung löschen."
 
 #. module: syscoon_finance_export
-#: code:addons/syscoon_finance_export/models/account_move.py:189
+#: code:addons/syscoon_finance_export/models/account_move.py:246
 #, python-format
 msgid "Please delete the Datev-Export first"
 msgstr "Bitte löschen Sie zuerst den Datev-Export"
@@ -528,7 +590,7 @@ msgstr "Belegfeld2"
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_exports_state
 msgid "State"
-msgstr "Bundesland"
+msgstr "Status"
 
 #. module: syscoon_finance_export
 #: model:ir.model.fields,field_description:syscoon_finance_export.field_export_move_state
@@ -593,7 +655,7 @@ msgid "Without function at the moment."
 msgstr "Zur Zeit ohne Funktion."
 
 #. module: syscoon_finance_export
-#: code:addons/syscoon_finance_export/models/account_move.py:188
+#: code:addons/syscoon_finance_export/models/account_move.py:245
 #, python-format
 msgid "You can not delete a Move which is exported to Datev!"
 msgstr "Sie können keine Buchung löschen, welche bereits nach Datev exportiert wurde!"
