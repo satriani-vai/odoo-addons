@@ -241,7 +241,5 @@ class AccountMove2ExportMove(models.Model):
     def button_cancel(self):
         for move in self:
             if move.state == 'export_move':
-                raise UserError(_('Forbidden to Cancel!'),\
-                    _('You can not delete a Move which is exported to Datev!'),\
-                    _('Please delete the Datev-Export first'))
+                raise UserError(_('Forbidden to Cancel! You can not delete a Move which is exported! Please delete the Datev-Export first'))
         return super(AccountMove2ExportMove, self).button_cancel()
