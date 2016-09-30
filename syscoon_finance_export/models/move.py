@@ -107,7 +107,7 @@ class ExportMove(models.Model):
                 e.cost2.encode('iso-8859-1'),
                 e.cost_quant.encode('iso-8859-1'),
                 e.discount.encode('iso-8859-1'),
-                e.bookingtext.encode('iso-8859-1'),
+                e.bookingtext.encode('iso-8859-1', 'ignore'),
                 e.vat_id.encode('iso-8859-1'),
                 e.eu_tax.encode('iso-8859-1'),
                 e.base_cur_amount.encode('iso-8859-1'),
