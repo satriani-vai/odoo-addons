@@ -107,7 +107,7 @@ class AccountMove2ExportMove(models.Model):
         res['account_offset'] = line.account_id.code
         res['slip1'] = move.name.replace('/', '')
         if line.date_maturity:
-            res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%d%m%y')
+            res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%d%m%Y')
         else:
             res['slip2'] = ''
         res['booking_date'] = fields.Date.from_string(move.date).strftime('%d%m')
