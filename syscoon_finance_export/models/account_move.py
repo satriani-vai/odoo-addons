@@ -107,7 +107,10 @@ class AccountMove2ExportMove(models.Model):
         res['account_offset'] = line.account_id.code
         res['slip1'] = move.name.replace('/', '')
         if line.date_maturity:
-            res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%d%m%Y')
+            if line.date_maturity[:4] < '1900':
+                res['slip2'] = ''
+            else:
+                res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%d%m%y')
         else:
             res['slip2'] = ''
         res['booking_date'] = fields.Date.from_string(move.date).strftime('%d%m')
@@ -181,10 +184,6 @@ class AccountMove2ExportMove(models.Model):
                 return export_errors, export_moves, export_logger
             export_moves += 1
             for line in move_lines:
-                if account['sign'] == 's' and line.debit:
-                    account['sign'] = 'h'
-                if account['sign'] == 'h' and line.credit:
-                    account['sign'] = 's'
                 res = self.st_build_line(account, move, res, line)
                 if res['account_offset'] != res['account']:
                     if res['account_offset'] in tax_accounts:
