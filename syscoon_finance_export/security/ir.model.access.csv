@@ -13,3 +13,5 @@ access_move_export_move_create_manager,move.export.move.create.manager,syscoon_f
 access_move_export_move_export_manager,move.export.move.export.manager,syscoon_finance_export.model_export_move_export,account.group_account_manager,1,1,1,1
 access_move_export_configuration_manager,move.export.configuration.manager,syscoon_finance_export.model_export_configuration,account.group_account_manager,1,1,1,1
 access_move_export_exports_manager,move.export.export.manager,syscoon_finance_export.model_export_exports,account.group_account_manager,1,1,1,1
+access_move_export_logger_manager,move.export.logger.manager,syscoon_finance_export.model_export_logger,account.group_account_manager,1,1,1,1
+access_move_export_logger_accountant,move.export.logger.accountant,syscoon_finance_export.model_export_logger,account.group_account_user,1,1,1,0
