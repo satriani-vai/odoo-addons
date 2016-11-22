@@ -12,3 +12,4 @@ class AccountMoveExportLogger(models.Model):
     logging = fields.Text('Logging')
     moves = fields.Integer('Created Moves')
     errors = fields.Integer('Errors')
+    counts = fields.Integer('Convertet Moves')

@@ -11,7 +11,7 @@ class ExportMoveCreate(models.TransientModel):
         moves = self.env['account.move'].browse(context.get('active_ids'))
         move_to_datev = self.env['account.move']
         for move in moves:
-            if move.state == 'posted':
+            if move.state == 'posted' and move.move_created == False:
                 move_to_datev += move
         if not move_to_datev:
             raise UserError(_('There is no posted move item to create a Datev-Move.'))

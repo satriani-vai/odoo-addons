@@ -17,6 +17,12 @@ class ExportConfiguration(models.Model):
     export_method = fields.Selection([('gross', 'gross'), ('net', 'net')], required=True)
     scheduler_journals = fields.Many2many('account.journal')
     scheduler_limit = fields.Integer('Limit Moves', default=0)
+    overall_forward = fields.Many2one('account.account', string='Overall Forward Account')
+    sum_forward = fields.Many2one('account.account', string='Sum Forward Account')
+    debit_forward = fields.Many2one('account.account', string='Debit Forward Account')
+    credit_forward = fields.Many2one('account.account', string='Credit Forward Account')
+    wage_through = fields.Many2one('account.account', string='Wage Through Account')
+    do_checks = fields.Boolean('Enable Checks')
 
     _sql_constraints = [
         ('company_unique', 'unique (company_id)',

@@ -23,6 +23,7 @@ Generates a CSV-Export for Datev and other German Accounting Programms.
         'views/configuration.xml',
         'views/logger.xml',
         'views/exports.xml',
+        'views/account_move.xml',
         'wizard/move_create_view.xml',
         'wizard/move_unlink_view.xml',
         'wizard/move_export_view.xml'
