@@ -14,10 +14,14 @@ _logger = logging.getLogger(__name__)
 class AccountMove2ExportMove(models.Model):
     _inherit = 'account.move'
 
-    state = fields.Selection(
-        selection_add=[('export_move', 'Datev Move Created')])
+    move_created = fields.Boolean('Export Move Created')
 
-    def st_compute_debit_credit(self, move, lines):
+    def st_compute_debit_credit(self, move, lines, export_config):
+        overall_forward = export_config.overall_forward.code
+        sum_forward = export_config.sum_forward.code
+        debit_forward = export_config.debit_forward.code
+        credit_forward = export_config.credit_forward.code
+        wage_through = export_config.wage_through.code
         debit = 0.0
         debit_accounts = []
         credit = 0.0
@@ -30,24 +34,55 @@ class AccountMove2ExportMove(models.Model):
             if line.credit:
                 credit += line.credit
                 credit_accounts.append(line.account_id.code)
-        if invoice and invoice.type in ['out_invoice', 'in_refund']:
-            debit_accounts = []
-            if not invoice.account_id.code in debit_accounts:
-                debit_accounts.append(invoice.account_id.code)
-        if invoice and invoice.type in ['out_refund', 'in_invoice']:
-            credit_accounts = []
-            if not invoice.account_id.code in debit_accounts:
-                credit_accounts.append(invoice.account_id.code)
-        for da in debit_accounts:
-            account = self.env['account.account'].search([('code', '=', da)])
-            if account.user_type_id.type in ('receivable', 'payable'):
-                debit_accounts =[]
-                debit_accounts.append(account.code)
-        for ca in credit_accounts:
-            account = self.env['account.account'].search([('code', '=', ca)])
-            if account.user_type_id.type in ('receivable', 'payable'):
+        if overall_forward or sum_forward or debit_forward or credit_forward or wage_through in debit_accounts:
+            debit_forwards = []
+            if overall_forward in debit_accounts:
+                debit_forwards.append(overall_forward)
+            if sum_forward in debit_accounts:
+                debit_forwards.append(sum_forward)
+            if debit_forward in debit_accounts:
+                debit_forwards.append(debit_forward)
+            if credit_forward in debit_accounts:
+                debit_forwards.append(credit_forward)
+            if wage_through in debit_accounts:
+                debit_forwards.append(wage_through)
+            if debit_forwards:
+                debit_accounts = []
+                debit_accounts.append(debit_forwards[0])
+        if overall_forward or sum_forward or debit_forward or credit_forward or wage_through in debit_accounts:
+            credit_forwards = []
+            if overall_forward in credit_accounts:
+                credit_forwards.append(overall_forward)
+            if sum_forward in credit_accounts:
+                debit_accounts.append(sum_forward)
+            if debit_forward in credit_accounts:
+                credit_forwards.append(debit_forward)
+            if credit_forward in credit_accounts:
+                credit_forwards.append(credit_forward)
+            if wage_through in credit_accounts:
+                credit_forwards.append(wage_through)
+            if credit_forwards:
+                credit_accounts =[]
+                credit_accounts.append(credit_forwards[0])
+        if overall_forward or sum_forward or debit_forward or credit_forward or wage_through not in debit_accounts:
+            if invoice and invoice.type in ['out_invoice', 'in_refund']:
+                debit_accounts = []
+                if not invoice.account_id.code in debit_accounts:
+                    debit_accounts.append(invoice.account_id.code)
+            if invoice and invoice.type in ['out_refund', 'in_invoice']:
                 credit_accounts = []
-                credit_accounts.append(account.code)
+                if not invoice.account_id.code in debit_accounts:
+                    credit_accounts.append(invoice.account_id.code)
+            for da in debit_accounts:
+                account = self.env['account.account'].search([('code', '=', da)])
+                if account.user_type_id.type in ('receivable', 'payable'):
+                    debit_accounts =[]
+                    debit_accounts.append(account.code)
+            for ca in credit_accounts:
+                account = self.env['account.account'].search([('code', '=', ca)])
+                if account.user_type_id.type in ('receivable', 'payable'):
+                    credit_accounts = []
+                    credit_accounts.append(account.code)
         totals = {
             'debit': debit,
             'debit_accounts': sorted(set(debit_accounts)),
@@ -77,29 +112,40 @@ class AccountMove2ExportMove(models.Model):
                 tax_pc = auto_account_id.vat_code.amount
         return bool(auto_account_id), tax_bkey, tax_pc, tax_account, tax_account_refund
 
-    def st_calculate_amount(self, move, line, tax_pc):
-        #todo: gross if company-settings are gross
+    def st_calculate_amount(self, move, line, tax_pc, account, export_config):
+        overall_forward = export_config.overall_forward.code
+        sum_forward = export_config.sum_forward.code
+        debit_forward = export_config.debit_forward.code
+        credit_forward = export_config.credit_forward.code
         amount = 0.0
         if line.debit:
             amount += line.debit
         if line.credit:
             amount += line.credit
         if tax_pc:
-            gross_amount = amount * (1 + (tax_pc / 100))
-            tax = gross_amount - amount
-            amount += tax
+            if overall_forward == account['account']:
+                amount = amount
+            elif sum_forward == account['account']:
+                amount = amount
+            elif debit_forward == account['account']:
+                amount = amount
+            elif credit_forward == account['account']:
+                amount = amount
+            else:
+                gross_amount = amount * (1 + (tax_pc / 100))
+                tax = gross_amount - amount
+                amount += tax
         amount = move.currency_id.round(amount)
         return amount
 
-    def st_build_line(self, account, move, res, line):
+    def st_build_line(self, account, move, res, line, export_config):
         auto_account, tax_bkey, tax_pc, tax_account, tax_account_refund =\
             self.st_check_account(line)
         res['name'] = 'New'
         res['date'] = move.date
         res['currency'] = move.currency_id.name
         res['dc_sign'] = account['sign']
-#        res['amount'] = str(self.st_calculate_amount(move, line, tax_pc)).replace('.', ',')
-        res['amount'] = self.st_calculate_amount(move, line, tax_pc)
+        res['amount'] = self.st_calculate_amount(move, line, tax_pc, account, export_config)
         if auto_account:
             res['bkey'] = ''
         else:
@@ -130,8 +176,8 @@ class AccountMove2ExportMove(models.Model):
         res['move_date'] = move.date
         return res
 
-    def st_generate_account(self, move, lines):
-        totals = self.st_compute_debit_credit(move, lines)
+    def st_generate_account(self, move, lines, export_config):
+        totals = self.st_compute_debit_credit(move, lines, export_config)
         account = False
         sign = False
         for line in lines:
@@ -172,19 +218,32 @@ class AccountMove2ExportMove(models.Model):
             booking.append(val.copy())
         return booking
 
-    def st_generate_line(self, move, tax_accounts, export_logger, export_errors, export_moves):
+    def st_generate_line(self, move, tax_accounts, export_logger, export_errors, export_count, export_moves, export_config):
         booking = []
         res = {}
         if move.amount:
             move_lines = move.line_ids
-            account = self.st_generate_account(move, move_lines)
+            account = self.st_generate_account(move, move_lines, export_config)
+            export_count += 1
             if account['account'] == False:
                 export_logger.append(_('%s has no / to many different accounts in debit / credit and can not exported') % move.name)
                 export_errors += 1
                 return export_errors, export_moves, export_logger
-            export_moves += 1
             for line in move_lines:
-                res = self.st_build_line(account, move, res, line)
+                if export_config.do_checks:
+                    auto_account_id = self.env['export.auto.account'].search([('account_id', '=', line.account_id.id)])
+                    tax_id = auto_account_id.vat_code
+                    line_tax_id = self.env['account.tax'].search([('id', '=', line.tax_ids.id)])
+                    if tax_id and tax_id.id != line.tax_ids.id:
+                        line_tax_id = self.env['account.tax'].search([('id', '=', line.tax_ids[0].id)])
+                        export_logger.append(_('Tax Code "%s" of the Auto Account is not the same as Tax Code "%s" in the Account Line "%s" of Move "%s"') % (tax_id.description, line_tax_id.description, line.name, move.name))
+                        export_errors += 1
+                        continue
+                if account['sign'] == 's' and line.debit:
+                    account['sign'] = 'h'
+                if account['sign'] == 'h' and line.credit:
+                    account['sign'] = 's'
+                res = self.st_build_line(account, move, res, line, export_config)
                 if res['account_offset'] != res['account']:
                     if res['account_offset'] in tax_accounts:
                         continue
@@ -192,46 +251,49 @@ class AccountMove2ExportMove(models.Model):
                         continue
                     else:
                         booking.append(res.copy())
+                        export_moves += 1
             grouped_lines = self.st_create_group(booking)
             for gl in grouped_lines:
                 self.env['export.move'].create(gl)
-                self.write({'state': 'export_move'})
-            return export_errors, export_moves, export_logger
+                self.write({'move_created': True})
+            return export_errors, export_count, export_moves, export_logger
 
 
     def st_check_tax_lines(self):
         tax_accounts = []
         for txid in self.env['account.tax'].search([]):
             if txid.account_id and txid.account_id.code not in tax_accounts:
-                tax_accounts.append(txid.account_id.code)
+                tax_accounts.append(txid.account_id.code[:4])
             if txid.refund_account_id and txid.refund_account_id.code not in tax_accounts:
-                tax_accounts.append(txid.refund_account_id.code)
+                tax_accounts.append(txid.refund_account_id.code[:4])
         return tax_accounts
 
     @api.multi
     def action_export_move_create(self):
         export_logger = []
         export_errors = 0
+        export_count = 0
         export_moves = 0
         tax_accounts = self.st_check_tax_lines()
         company = self.env['res.company']._company_default_get('account.move')
-        # export_config will be used in a later version
         export_config = self.env['export.configuration'].search([('company_id', '=', company.id)])
         for move in self:
             if not move.amount:
                 export_logger.append(_('%s has amount 0,00 and can not exported') % move.name)
                 export_errors += 1
             else:
-                em = self.st_generate_line(move, tax_accounts, export_logger, export_errors, export_moves)
-                export_moves = em[1]
+                em = self.st_generate_line(move, tax_accounts, export_logger, export_errors, export_count, export_moves, export_config)
+                export_moves = em[2]
+                export_count = em[1]
                 export_errors = em[0]
-                export_logger = em[2]
+                export_logger = em[3]
                 _logger.info('Move %s created.', move.name)
         if not export_errors:
             export_logger.append(_('No Errors, %d moves correctly created') % export_moves)
         self.env['export.logger'].create({
             'name': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             'errors': export_errors,
+            'counts': export_count,
             'moves': export_moves,
             'logging': '\n'.join(export_logger)
         })
@@ -239,6 +301,20 @@ class AccountMove2ExportMove(models.Model):
     @api.multi
     def button_cancel(self):
         for move in self:
-            if move.state == 'export_move':
+            if move.move_created == True:
                 raise UserError(_('Forbidden to Cancel! You can not delete a Move which is exported! Please delete the Datev-Export first'))
         return super(AccountMove2ExportMove, self).button_cancel()
+
+    @api.model
+    def create(self, vals):
+        move = super(AccountMove2ExportMove, self).create(vals)
+        company = self.env['res.company']._company_default_get('account.move')
+        export_config = self.env['export.configuration'].search([('company_id', '=', company.id)])
+        if export_config.do_checks:
+            for line in vals['line_ids']:
+                auto_account_id = self.env['export.auto.account'].search([('account_id', '=', line[2]['account_id'])])
+                tax_id = auto_account_id.vat_code
+                if tax_id and tax_id.id != line[2]['tax_ids'][0][1]:
+                    line_tax_id = self.env['account.tax'].search([('id', '=', line[2]['tax_ids'][0][1])])
+                    raise UserError(_('Tax Code "%s" of the Auto Account is not the same as Tax Code "%s" in the Account Line') % (tax_id.description, line_tax_id.description))
+        return move

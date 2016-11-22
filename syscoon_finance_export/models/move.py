@@ -88,7 +88,7 @@ class ExportMove(models.Model):
         dates = []
         for e in export_moves:
             dates.append(e.move_date)
-            amount = e.amount.replace('.', ',')
+            amount = e.amount
             if not e.bkey:
                 bkey = ''
             else:
@@ -98,11 +98,11 @@ class ExportMove(models.Model):
                 e.dc_sign.encode('iso-8859-1'),
                 amount,
                 bkey,
-                e.account.encode('iso-8859-1'),
+                e.account_offset.encode('iso-8859-1'),
                 e.slip1.encode('iso-8859-1'),
                 e.slip2.encode('iso-8859-1'),
                 e.booking_date.encode('iso-8859-1'),
-                e.account_offset.encode('iso-8859-1'),
+                e.account.encode('iso-8859-1'),
                 e.cost1.encode('iso-8859-1'),
                 e.cost2.encode('iso-8859-1'),
                 e.cost_quant.encode('iso-8859-1'),
@@ -149,4 +149,4 @@ class ExportMove(models.Model):
                 account_moves += dm.account_move
         for move in export_moves:
             move.unlink()
-        account_moves.write({'state': 'posted'})
+        account_moves.write({'move_created': False})

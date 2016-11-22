@@ -15,6 +15,7 @@
                             </h1>
                         </div>
                         <group>
+                            <field name="counts"/>
                             <field name="moves"/>
                             <field name="errors"/>
                             <field name="logging"/>
@@ -30,6 +31,7 @@
             <field name="arch" type="xml">
                 <tree string="Export Files" create="false" edit="false">
                     <field name="name"/>
+                    <field name="counts"/>
                     <field name="moves"/>
                     <field name="errors"/>
                 </tree>

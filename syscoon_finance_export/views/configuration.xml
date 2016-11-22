@@ -14,12 +14,23 @@
                                 <field name="company_id"/>
                             </h1>
                         </div>
-                        <group>
+                        <group string="Export Method">
                              <field name="export_method"/>
+                        </group>
+                        <group string="Forward and Through Accounts">
+                            <field name="overall_forward"/>
+                            <field name="sum_forward"/>
+                            <field name="debit_forward"/>
+                            <field name="credit_forward"/>
+                            <field name="wage_through"/>
                         </group>
                         <group>
                             <field name="auto_export_header"/>
                             <p>Without function at the moment.</p>
+                        </group>
+                        <group string="Enable Move Checks">
+                            <p>Enabling checks for Moves. It checks if it is a auto account and the line has the right tax.</p>
+                            <field name="do_checks"/>
                         </group>
                         <group  attrs="{'invisible': [('auto_export_header', '=', False)]}">
                             <field name="advisor_number" attrs="{'required': [('auto_export_header', '=', True)]}"/>
