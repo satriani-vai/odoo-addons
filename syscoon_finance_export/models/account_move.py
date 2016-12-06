@@ -152,16 +152,16 @@ class AccountMove2ExportMove(models.Model):
             res['bkey'] = ''
         else:
             res['bkey'] = tax_bkey
-        if line.account_id.code[0] == 'K' or line.account_id.code[0] == 'D':
-            res['account_offset'] = line.account_id.code[1:]
-        else:
-            res['account_offset'] = line.account_id.code[:4]
+        res['account_offset'] = line.account_id.code
         res['slip1'] = move.name.replace('/', '')
-        if line.date_maturity:
-            if line.date_maturity[:4] < '1900':
-                res['slip2'] = ''
+        if export_config.maturity_slip2:
+            if line.date_maturity:
+                if line.date_maturity[:4] < '1900':
+                    res['slip2'] = ''
+                else:
+                    res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('Y%m%t')
             else:
-                res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('Y%m%t')
+                res['slip2'] = ''
         else:
             res['slip2'] = ''
         res['booking_date'] = fields.Date.from_string(move.date).strftime('Y%m%t')
@@ -174,11 +174,8 @@ class AccountMove2ExportMove(models.Model):
         res['cost_quant'] = ''
         res['discount'] = ''
         res['bookingtext'] = line.name
-        if export_config.maturity_slip2:
-            if invoice.partner_id.vat and export_config.eu_fiscal_position == invoice.fiscal_position_id:
-                res['vat_id'] = invoice.partner_id.vat
-            else:
-                res['vat_id'] = ''
+        if invoice.partner_id.vat and export_config.eu_fiscal_position == invoice.fiscal_position_id:
+            res['vat_id'] = invoice.partner_id.vat
         else:
             res['vat_id'] = ''
         res['eu_tax'] = ''
