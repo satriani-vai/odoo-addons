@@ -9,6 +9,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='state']" position="after">
                     <field name="move_created" readonly="1"/>
+                    <field name="move_error"/>
                 </xpath>
             </field>
         </record>
@@ -19,7 +20,9 @@
             <field name="inherit_id" ref="account.view_move_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='ref']" position="after">
-                    <field name="move_created" readonly="1"/>
+                    <field name="move_created"/>
+                    <field name="move_error"/>
+                    <field name="move_error_message"/>
                 </xpath>
             </field>
         </record>

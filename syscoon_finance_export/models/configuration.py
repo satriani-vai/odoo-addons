@@ -23,6 +23,8 @@ class ExportConfiguration(models.Model):
     credit_forward = fields.Many2one('account.account', string='Credit Forward Account')
     wage_through = fields.Many2one('account.account', string='Wage Through Account')
     do_checks = fields.Boolean('Enable Checks')
+    eu_fiscal_position = fields.Many2one('account.fiscal.position', string='Fiscal Position for EU')
+    maturity_slip2 = fields.Boolean('Maturity in Slip2')
 
     _sql_constraints = [
         ('company_unique', 'unique (company_id)',
