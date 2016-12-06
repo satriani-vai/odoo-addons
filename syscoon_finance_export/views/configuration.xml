@@ -28,13 +28,17 @@
                             <field name="auto_export_header"/>
                             <p>Without function at the moment.</p>
                         </group>
-                        <group string="Enable Move Checks">
-                            <p>Enabling checks for Moves. It checks if it is a auto account and the line has the right tax.</p>
-                            <field name="do_checks"/>
-                        </group>
                         <group  attrs="{'invisible': [('auto_export_header', '=', False)]}">
                             <field name="advisor_number" attrs="{'required': [('auto_export_header', '=', True)]}"/>
                             <field name="client_number" attrs="{'required': [('auto_export_header', '=', True)]}"/>
+                        </group>
+                        <group string="Enable Move Checks">
+                            <p>Enabling checks for Moves. It checks if it is a auto account and the line has the right tax.</p><br/>
+                            <field name="do_checks"/>
+                        </group>
+                        <group string="Further Options">
+                            <field name="eu_fiscal_position" required="1"/>
+                            <field name="maturity_slip2"/>
                         </group>
                         <group string="Journals for Scheduler">
                             <field name="scheduler_journals" widget="many2many_tags"/>

@@ -15,6 +15,8 @@ class AccountMove2ExportMove(models.Model):
     _inherit = 'account.move'
 
     move_created = fields.Boolean('Export Move Created')
+    move_error = fields.Boolean('Move Error')
+    move_error_message = fields.Text('Error Message')
 
     def st_compute_debit_credit(self, move, lines, export_config):
         overall_forward = export_config.overall_forward.code
@@ -138,7 +140,7 @@ class AccountMove2ExportMove(models.Model):
         amount = move.currency_id.round(amount)
         return amount
 
-    def st_build_line(self, account, move, res, line, export_config):
+    def st_build_line(self, account, move, res, line, invoice, export_config):
         auto_account, tax_bkey, tax_pc, tax_account, tax_account_refund =\
             self.st_check_account(line)
         res['name'] = 'New'
@@ -150,23 +152,35 @@ class AccountMove2ExportMove(models.Model):
             res['bkey'] = ''
         else:
             res['bkey'] = tax_bkey
-        res['account_offset'] = line.account_id.code
+        if line.account_id.code[0] == 'K' or line.account_id.code[0] == 'D':
+            res['account_offset'] = line.account_id.code[1:]
+        else:
+            res['account_offset'] = line.account_id.code[:4]
         res['slip1'] = move.name.replace('/', '')
         if line.date_maturity:
             if line.date_maturity[:4] < '1900':
                 res['slip2'] = ''
             else:
-                res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%d%m%y')
+                res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('Y%m%t')
         else:
             res['slip2'] = ''
-        res['booking_date'] = fields.Date.from_string(move.date).strftime('%d%m')
-        res['account'] = account['account']
+        res['booking_date'] = fields.Date.from_string(move.date).strftime('Y%m%t')
+        if account['account'][0] == 'K' or account['account'][0] == 'D':
+            res['account'] = account['account'][1:]
+        else:
+            res['account'] = account['account'][:4]
         res['cost1'] = ''
         res['cost2'] = ''
         res['cost_quant'] = ''
         res['discount'] = ''
         res['bookingtext'] = line.name
-        res['vat_id'] = ''
+        if export_config.maturity_slip2:
+            if invoice.partner_id.vat and export_config.eu_fiscal_position == invoice.fiscal_position_id:
+                res['vat_id'] = invoice.partner_id.vat
+            else:
+                res['vat_id'] = ''
+        else:
+            res['vat_id'] = ''
         res['eu_tax'] = ''
         res['base_cur_amount'] = ''
         res['base_cur_code'] = ''
@@ -221,29 +235,39 @@ class AccountMove2ExportMove(models.Model):
     def st_generate_line(self, move, tax_accounts, export_logger, export_errors, export_count, export_moves, export_config):
         booking = []
         res = {}
+        move_error = 0
+        log = []
+        invoice = self.env['account.invoice'].search([('move_id', '=', move.id)])
         if move.amount:
             move_lines = move.line_ids
             account = self.st_generate_account(move, move_lines, export_config)
             export_count += 1
             if account['account'] == False:
-                export_logger.append(_('%s has no / to many different accounts in debit / credit and can not exported') % move.name)
+                error = _('%s has no / to many different accounts in debit / credit and can not exported') % move.name
+                log.append(error)
+                export_logger.append(error)
                 export_errors += 1
-                return export_errors, export_moves, export_logger
+                move_error += 1
+                move.write({'move_error': True, 'move_error_message': '\n'.join(log)})
+                return export_errors, export_count, export_moves, export_logger
             for line in move_lines:
-                if export_config.do_checks:
+                if export_config.do_checks and invoice:
                     auto_account_id = self.env['export.auto.account'].search([('account_id', '=', line.account_id.id)])
                     tax_id = auto_account_id.vat_code
                     line_tax_id = self.env['account.tax'].search([('id', '=', line.tax_ids.id)])
                     if tax_id and tax_id.id != line.tax_ids.id:
-                        line_tax_id = self.env['account.tax'].search([('id', '=', line.tax_ids[0].id)])
-                        export_logger.append(_('Tax Code "%s" of the Auto Account is not the same as Tax Code "%s" in the Account Line "%s" of Move "%s"') % (tax_id.description, line_tax_id.description, line.name, move.name))
+                        line_tax_id = self.env['account.tax'].search([('id', '=', line.tax_ids.id)])
+                        error1 = _('Tax Code "%s" of the Auto Account is not the same as Tax Code "%s" in the Account Line "%s" of Move "%s"') % (tax_id.description, line_tax_id.description, line.name, move.name)
+                        log.append(error1)
+                        export_logger.append(error1)
                         export_errors += 1
+                        move_error +=1
                         continue
                 if account['sign'] == 's' and line.debit:
                     account['sign'] = 'h'
                 if account['sign'] == 'h' and line.credit:
                     account['sign'] = 's'
-                res = self.st_build_line(account, move, res, line, export_config)
+                res = self.st_build_line(account, move, res, line, invoice, export_config)
                 if res['account_offset'] != res['account']:
                     if res['account_offset'] in tax_accounts:
                         continue
@@ -252,10 +276,40 @@ class AccountMove2ExportMove(models.Model):
                     else:
                         booking.append(res.copy())
                         export_moves += 1
+            if not booking:
+                move_error += 1
+                export_errors += 1
+                error2 = _('Move %s can not be exported, because it is empty.') % (move.name)
+                log.append(error2)
+                export_logger.append(error2)
             grouped_lines = self.st_create_group(booking)
+            """
+            amount_check_s = 0.0
+            amount_check_h = 0.0
             for gl in grouped_lines:
-                self.env['export.move'].create(gl)
-                self.write({'move_created': True})
+                if gl['dc_sign'] == 's':
+                    amount_check_s += gl['amount']
+                if gl['dc_sign'] == 'h':
+                    amount_check_h += gl['amount']
+            if amount_check_h > amount_check_s:
+                amount_check = amount_check_h - amount_check_s
+            else:
+                amount_check = amount_check_s - amount_check_h
+            amch = round(move.amount - amount_check, 2)
+            if amch != 0.0:
+                move_error += 1
+                export_errors += 1
+                error2 = _('Move %s can not be exported, because Amount %s in Export-Move is not equal to the Amount %s in Move') % (move.name, amount_check, move.amount)
+                log.append(error2)
+                export_logger.append(error2)
+            """
+            if move_error == 0:
+                for gl in grouped_lines:
+                    if move_error == 0:
+                        self.env['export.move'].create(gl)
+                        move.write({'move_created': True})
+            if move_error != 0:
+                move.write({'move_error': True, 'move_error_message': '\n'.join(log)})
             return export_errors, export_count, export_moves, export_logger
 
 

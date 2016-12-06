@@ -88,7 +88,10 @@ class ExportMove(models.Model):
         dates = []
         for e in export_moves:
             dates.append(e.move_date)
-            amount = e.amount
+            if e.amount:
+                amount = e.amount.replace('.', ',')
+            if not e.amount:
+                amount = '0,0'
             if not e.bkey:
                 bkey = ''
             else:
