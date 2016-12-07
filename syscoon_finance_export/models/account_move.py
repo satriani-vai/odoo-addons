@@ -153,22 +153,19 @@ class AccountMove2ExportMove(models.Model):
         else:
             res['bkey'] = tax_bkey
         res['account_offset'] = line.account_id.code
-        res['slip1'] = move.name.replace('/', '')
+        res['slip1'] = move.name.replace(' !@#$%^&*()[]{};:,./<>?\|`~-=_+', '')
         if export_config.maturity_slip2:
             if line.date_maturity:
                 if line.date_maturity[:4] < '1900':
                     res['slip2'] = ''
                 else:
-                    res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('Y%m%t')
+                    res['slip2'] = fields.Date.from_string(line.date_maturity).strftime('%Y%m%d')
             else:
                 res['slip2'] = ''
         else:
             res['slip2'] = ''
-        res['booking_date'] = fields.Date.from_string(move.date).strftime('Y%m%t')
-        if account['account'][0] == 'K' or account['account'][0] == 'D':
-            res['account'] = account['account'][1:]
-        else:
-            res['account'] = account['account'][:4]
+        res['booking_date'] = fields.Date.from_string(move.date).strftime('%Y%m%d')
+        res['account'] = account['account']
         res['cost1'] = ''
         res['cost2'] = ''
         res['cost_quant'] = ''
