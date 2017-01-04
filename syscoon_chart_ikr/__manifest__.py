@@ -3,7 +3,7 @@
 
 {
     'name': 'syscoon Kontenrahmen IKR',
-    'version': '1.0',
+    'version': '10.0.1.0',
     'author': 'copado MEDIA',
 	'website': 'http://www.copado.de',
     'category': 'Localization/Account Charts',

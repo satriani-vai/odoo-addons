@@ -4,7 +4,7 @@
 
 {
     'name': 'syscoon Minimum Sale-Order Value',
-    'version': '9.0.1.0',
+    'version': '10.0.1.0',
     'author': 'Mathias Neef',
     'website': 'http://syscoon.com',
     'category': 'Sales Management',
