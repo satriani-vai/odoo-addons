@@ -5,7 +5,7 @@
 
 {
     'name': 'syscoon Salutation',
-    'version': '10.0.1.0',
+    'version': '9.0.1.0',
     'category': 'Administration',
     'author': 'Mathias Neef',
     'website': 'https://syscoon.com',

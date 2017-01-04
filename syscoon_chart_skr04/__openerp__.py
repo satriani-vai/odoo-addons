@@ -2,13 +2,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'syscoon SKR03 - Accounting',
-    'version': '10.0.1.0',
+    'name': 'syscoon Kontenrahmen SKR04',
+    'version': '9.0.1.0',
     'author': 'Mathias Neef',
     'website': 'https://syscoon.com',
     'category': 'Localization/Account Charts',
     'description': """
-Dieses  Modul beinhaltet einen deutschen Kontenrahmen basierend auf dem SKR03.
+Dieses  Modul beinhaltet einen deutschen Kontenrahmen basierend auf dem SKR04.
 ==============================================================================
 
 German accounting chart and localization.
