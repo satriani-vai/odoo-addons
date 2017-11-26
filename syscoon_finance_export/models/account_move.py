@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from openerp import models, fields, api, _
-from openerp.exceptions import UserError
-from openerp.tools.float_utils import float_is_zero
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
+from odoo.tools.float_utils import float_is_zero
 
 from datetime import datetime
 
