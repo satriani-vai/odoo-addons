@@ -6,8 +6,8 @@ import csv
 import base64
 import datetime
 
-from openerp import models, fields, api, _
-from openerp.exceptions import UserError
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 class ExportMove(models.Model):
     _name = 'export.move'
